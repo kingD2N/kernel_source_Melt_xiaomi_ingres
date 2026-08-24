@@ -569,6 +569,7 @@ static int amdgpu_uvd_cs_msg_decode(struct amdgpu_device *adev, uint32_t *msg,
 
 	/* Reject invalid dimensions */
 	if (width < 16 || height < 16 || width > 4096 || height > 4096) {
+
 		dev_WARN_ONCE(adev->dev, 1,
 			      "Invalid UVD decoding dimensions (%dx%d)!\n",
 			      width, height);
