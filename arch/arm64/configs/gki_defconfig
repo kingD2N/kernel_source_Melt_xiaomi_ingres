@@ -786,8 +786,12 @@ CONFIG_ZSMALLOC=m
 # MTD framework (generic, dipakai untuk pstore/oops logging)
 CONFIG_MTD=m
 CONFIG_MTD_BLOCK=m
-CONFIG_MTD_BLOCK2MTD=m
-CONFIG_MTD_OOPS=m
+# MTD_BLOCK2MTD & MTD_OOPS dimatikan: rebutan reserved-memory 0xa7000000 sama
+# CONFIG_PSTORE_RAM di bawah, bikin ramoops/pstore kena corrupt/gagal kebaca
+# (lihat: bootlog.tar.gz dmesg.old.log - "ramoops: using 0x400000@0xa7000000"
+# vs "mtdoops: pares mtd_dt, mem_address=0xa7000000" - alamat sama persis)
+# CONFIG_MTD_BLOCK2MTD is not set
+# CONFIG_MTD_OOPS is not set
 
 # === Ditambahkan dari marble_defconfig (lanjutan): fitur yang berpotensi bisa dipakai ===
 # Bukan pasti-tidak-aman, tapi bergantung apakah source/Kconfig-nya ada di tree ingres.
