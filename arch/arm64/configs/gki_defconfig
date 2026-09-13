@@ -66,8 +66,6 @@ CONFIG_SETEND_EMULATION=y
 CONFIG_RANDOMIZE_BASE=y
 # CONFIG_RANDOMIZE_MODULE_REGION_FULL is not set
 # CONFIG_STACKPROTECTOR_PER_TASK is not set
-# noirqdebug ditambahkan dari DoraCore_defconfig - generic, aman, cuma matikan periodic
-# IRQ debug checking, bukan behavior interrupt yang sebenarnya
 CONFIG_CMDLINE="stack_depot_disable=on kasan.stacktrace=off kvm-arm.mode=protected cgroup_disable=pressure cgroup.memory=nokmem noirqdebug"
 CONFIG_CMDLINE_EXTEND=y
 # CONFIG_DMI is not set
@@ -88,8 +86,6 @@ CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
 CONFIG_CPU_FREQ_GOV_ONDEMAND=y
 CONFIG_CPU_FREQ_GOV_USERSPACE=y
 CONFIG_CPU_FREQ_GOV_PERFORMANCE=y
-# Governor utama untuk Snapdragon 8 Gen 1 (SM8450/Waipio). Berpasangan dengan
-# CONFIG_ARM_QCOM_CPUFREQ_HW dan CONFIG_SCHED_WALT yang sudah ada di file ini.
 CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y
 CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL=y
 CONFIG_ARM_SCPI_CPUFREQ=y
@@ -713,9 +709,6 @@ CONFIG_HIST_TRIGGERS=y
 CONFIG_FUNCTION_ERROR_INJECTION=y
 # CONFIG_RUNTIME_TESTING_MENU is not set
 
-# === Ditambahkan dari marble_defconfig ===
-# Hanya fitur generic/software (bukan hardware-specific) yang aman untuk ingres (SM8450)
-
 # IPC & namespaces (generic)
 CONFIG_SYSVIPC=y
 CONFIG_POSIX_MQUEUE=y
@@ -788,18 +781,6 @@ CONFIG_ZSMALLOC=m
 # MTD framework (generic, dipakai untuk pstore/oops logging)
 CONFIG_MTD=m
 CONFIG_MTD_BLOCK=m
-# MTD_BLOCK2MTD & MTD_OOPS dimatikan: rebutan reserved-memory 0xa7000000 sama
-# CONFIG_PSTORE_RAM di bawah, bikin ramoops/pstore kena corrupt/gagal kebaca
-# (lihat: bootlog.tar.gz dmesg.old.log - "ramoops: using 0x400000@0xa7000000"
-# vs "mtdoops: pares mtd_dt, mem_address=0xa7000000" - alamat sama persis)
-# CONFIG_MTD_BLOCK2MTD is not set
-# CONFIG_MTD_OOPS is not set
-
-# === Ditambahkan dari marble_defconfig (lanjutan): fitur yang berpotensi bisa dipakai ===
-# Bukan pasti-tidak-aman, tapi bergantung apakah source/Kconfig-nya ada di tree ingres.
-# Sebagian besar driver platform QCOM/GH ini sama-sama berlaku untuk SM8450 (Waipio),
-# jadi kemungkinan besar relevan. Kalau symbol tidak dikenal kernel source ingres,
-# kbuild akan mengabaikannya (tidak menggagalkan build), tapi fiturnya tidak akan aktif.
 CONFIG_MQ_IOSCHED_ADIOS=y
 CONFIG_MQ_IOSCHED_SSG=y
 CONFIG_MQ_IOSCHED_SSG_CGROUP=y
@@ -1170,60 +1151,25 @@ CONFIG_KSHRINK_SLABD=m
 CONFIG_KSHRINK_LRUVECD=m
 CONFIG_MACH_XIAOMI=y
 CONFIG_NOMOUNT=y
-
-# === Ditambahkan dari DoraCore_defconfig ===
-# Fitur generic/software yang aman & tidak bentrok dengan pilihan yang sudah dipakai ingres (SM8450)
-
-# RCU tuning tambahan - pasangan dari CONFIG_RCU_BOOST=y & CONFIG_RCU_NOCB_CPU=y yang sudah ada
 CONFIG_RCU_BOOST_DELAY=500
 CONFIG_RCU_BOOT_END_DELAY=20000
 CONFIG_RCU_NOCB_CPU_CB_BOOST=y
-
-# Symbol table lengkap - baik utk kompatibilitas hook KernelSU/ftrace, jangan di-trim
 CONFIG_KALLSYMS=y
 # CONFIG_TRIM_UNUSED_KSYMS is not set
 CONFIG_MODULE_COMPRESS_ZSTD=y
-
-# PM clock helper generic (dipakai driver lain lewat runtime PM, aman berdiri sendiri)
 CONFIG_PM_CLK=y
-
-# cpuidle multi-driver - berguna utk topologi heterogen 1+3+4 (Prime/Big/Little) SM8450
 CONFIG_CPU_IDLE_MULTIPLE_DRIVERS=y
-
-# Skip full sync saat suspend (generic, mempercepat suspend/resume)
 CONFIG_SUSPEND_SKIP_SYNC=y
-
-# Netfilter tambahan - melengkapi section netfilter/ipset yang sudah ada di atas
 CONFIG_NETFILTER_XT_TARGET_REJECT=y
-
-# Sub-fitur DAMON tambahan - aman karena CONFIG_DAMON=y/PADDR/SYSFS di file ini sudah
-# terbukti dikenali source tree (bukan fitur baru, cuma melengkapi yang sudah jalan)
 CONFIG_DAMON_VADDR=y
 CONFIG_DAMON_LRU_SORT=y
-
-# F2FS: CONFIG_F2FS_FS_COMPRESSION=y di atas SEBELUMNYA tidak punya backend algoritma
-# kompresi apapun -> tanpa baris LZ4/ZSTD di bawah, kompresi F2FS tidak benar-benar aktif
-# (butuh minimal satu backend). XATTR juga ditambahkan utk mendukung label SELinux
-# (CONFIG_F2FS_FS_SECURITY yang sudah ada biasanya butuh ini).
 CONFIG_F2FS_FS_LZ4=y
 CONFIG_F2FS_FS_ZSTD=y
 CONFIG_F2FS_FS_XATTR=y
 CONFIG_F2FS_CHECK_FS=n
 CONFIG_F2FS_STAT_FS=n
 CONFIG_F2FS_IO_TRACE=n
-
-# UFS inline crypto varian Qualcomm - relevan krn ingres/SM8450 pakai storage UFS +
-# crypto engine QTI (melengkapi CONFIG_SCSI_UFS_CRYPTO & CONFIG_MMC_CRYPTO_QTI yg sudah ada)
 CONFIG_SCSI_UFS_INLINE_CRYPTO_QTI=y
-
-# === Ditambahkan dari DoraCore_defconfig (lanjutan): fitur yang berpotensi bisa dipakai ===
-# Sama seperti section marble di atas: tergantung apakah patch/Kconfig-nya benar-benar ada
-# di source tree kernel (Templar-OSS). Kalau tidak dikenali, kbuild akan mengabaikan baris
-# ini (build TIDAK gagal), tapi fiturnya juga tidak aktif - cek dulu sebelum diandalkan.
-
-# Root/ROM hiding tambahan (SuSFS) - confidence lebih tinggi drpd item lain di section ini,
-# krn Templar Kernel katanya sudah integrasi SuSFS4KSU lewat CI, jadi kemungkinan besar
-# Kconfig ini memang sudah dikenali. Tetap cek versi patch SUSFS yg dipakai (symbol berubah antar versi).
 CONFIG_KSU_SUSFS=y
 CONFIG_KSU_SUSFS_SUS_PATH=y
 CONFIG_KSU_SUSFS_SUS_MOUNT=y
@@ -1234,32 +1180,21 @@ CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y
 CONFIG_KSU_SUSFS_ENABLE_LOG=y
 CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y
 CONFIG_KSU_SUSFS_OPEN_REDIRECT=y
-
-# Spoof uname per-app (biasanya sepaket dgn patch SUSFS/KernelSU-Next). GANTI value string
-# di bawah - jangan pakai apa adanya, itu signature kernel DoraCore, bukan Templar Kernel.
 CONFIG_UNAME_OVERRIDE=y
 CONFIG_UNAME_OVERRIDE_TARGET="com.google.android.gms"
 CONFIG_UNAME_OVERRIDE_STRING="GANTI_SESUAI_SIGNATURE_TEMPLAR_KERNEL"
-
-# Scheduler & governor custom - masing-masing butuh patch tersendiri di kernel source,
-# cek dulu ada di Templar-OSS atau tidak sebelum mengandalkan efeknya
 CONFIG_SCHED_BORE=y
 CONFIG_SCHED_CASS=y
 CONFIG_SCHED_PREFER_SILVER=y
 CONFIG_CPU_FREQ_GOV_REFLEX=y
 CONFIG_CPU_FREQ_GOV_SCHEDHORIZON=y
 CONFIG_MQ_ADIOS_DEFAULT=y
-
-# MGLRU (Multi-Gen LRU) - reclaim generation lebih baru drpd LRU klasik, mainline baru
-# masuk di 5.19/6.1, jadi di base GKI 5.10 ini butuh backport tersendiri
 CONFIG_LRU_GEN=y
 CONFIG_LRU_GEN_ENABLED=y
 CONFIG_LRU_GEN_STATS=y
 CONFIG_ANON_MIN_RATIO=2
 CONFIG_CLEAN_LOW_RATIO=4
 CONFIG_CLEAN_MIN_RATIO=1
-
-# ZRAM tingkat lanjut - backend/daemon di luar CONFIG_ZRAM dasar yg sudah ada di atas
 CONFIG_KCOMPRESSD=y
 CONFIG_ZBLOCK=y
 CONFIG_ZRAM_USE_ZBLOCK=y
@@ -1269,22 +1204,12 @@ CONFIG_ZRAM_DEF_COMP="zstd"
 CONFIG_ZRAM_AUTO_RESIZE=y
 CONFIG_ZRAM_AUTO_RESIZE_PERCENT=50
 CONFIG_CRYPTO_LZ4KD=y
-
-# KSM mainline, tapi ada pertimbangan side-channel timing (dedup halaman antar proses) -
-# utk device pribadi risikonya kecil, tapi tetap fitur yg sebaiknya sadar konsekuensinya.
-# UKSM sendiri BUKAN mainline, perlu patch pihak ketiga terpisah dari KSM biasa.
 CONFIG_KSM=y
 CONFIG_UKSM=y
 CONFIG_UKSM_CPU_GOVERNOR=2
 CONFIG_UKSM_SLEEP_MS=1000
-
-# Fitur komunitas custom kernel lain yang masing-masing butuh patch/driver tersendiri
 CONFIG_BOEFFLA_WL_BLOCKER=y
 CONFIG_POWERSUSPEND=y
-
-# LRNG - pengganti /dev/random bawaan kernel (subsistem terpisah), sekalian trust penuh
-# RNG hardware CPU/bootloader. Ini keputusan keamanan, bukan cuma nyala/mati performa biasa -
-# pertimbangkan matang sebelum enable, jangan asal ikut.
 CONFIG_LRNG=y
 CONFIG_LRNG_AUTO_SELECTED=y
 CONFIG_LRNG_SHA256=y
@@ -1303,19 +1228,9 @@ CONFIG_LRNG_DRNG_CHACHA20=y
 CONFIG_LRNG_DFLT_DRNG_CHACHA20=y
 CONFIG_RANDOM_TRUST_CPU=y
 CONFIG_RANDOM_TRUST_BOOTLOADER=y
-
-# Build/misc yang perlu dicek manual satu-satu
 CONFIG_BUILD_ARM64_DT_OVERLAY=y
 CONFIG_MODULE_FORCE_LOAD=y
 CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
-
-# Input boost - KONSEP-nya generic & aman, TAPI angka frekuensi bawaan DoraCore di bawah
-# kemungkinan besar BUKAN utk SM8450: MAX_BOOST_FREQ_PRIME 2419200 (2.4GHz) terlalu rendah
-# utk core Prime/X2 8 Gen 1 yg mentok bisa >2.9GHz. CPU mask-nya (LITTLE/BIG/PRIME) SUDAH
-# BENAR utk topologi 1+3+4 SM8450 (silver 0-3, gold 4-6, prime 7) jadi aman dipakai apa
-# adanya. Baris frekuensi sengaja dikomentari - isi manual sesuai tabel freq asli ingres
-# dulu, dan pastikan tidak dobel-atur dgn DeviceTuningProfile-ingres yg sudah handle boost
-# dari userspace, sebelum diaktifkan.
 CONFIG_LITTLE_CPU_MASK=15
 CONFIG_BIG_CPU_MASK=112
 CONFIG_PRIME_CPU_MASK=128
@@ -1328,22 +1243,3 @@ CONFIG_PRIME_CPU_MASK=128
 # CONFIG_MAX_BOOST_FREQ_LP=<isi_sesuai_tabel_freq_little>
 # CONFIG_MAX_BOOST_FREQ_PERF=<isi_sesuai_tabel_freq_big>
 # CONFIG_MAX_BOOST_FREQ_PRIME=<isi_sesuai_tabel_freq_prime>
-
-# === Catatan: opsi DoraCore yang SENGAJA TIDAK digabung ===
-# - CONFIG_LOCALVERSION="-DoraCore"             -> identitas kernel lain, bukan Templar Kernel
-# - CONFIG_LTO_CLANG_FULL                       -> bentrok dgn CONFIG_LTO_CLANG_THIN yg sudah dipakai
-# - CONFIG_CPU_FREQ_DEFAULT_GOV_REFLEX          -> bentrok dgn default SCHEDUTIL (pasangan SCHED_WALT)
-# - CONFIG_PELT_UTIL_HALFLIFE_16                -> bentrok dgn CONFIG_PELT_UTIL_HALFLIFE_12 yg sudah dipakai
-# - CONFIG_DEFAULT_BBR / DEFAULT_TCP_CONG="bbr" -> bentrok dgn CONFIG_DEFAULT_WESTWOOD yg sudah dipakai
-#   (CONFIG_TCP_CONG_BBR tetap ada sbg modul opsional, cuma bukan default)
-# - CONFIG_NET_SCH_{CODEL,FQ,MULTIQ,NETEM,SFQ,TBF} yg di-disable DoraCore -> TETAP aktif
-#   sesuai file ini, tidak ikut dimatikan
-# - # CONFIG_ARM64_PTR_AUTH / # CONFIG_MITIGATE_SPECTRE_BRANCH_HISTORY (DoraCore men-disable
-#   keduanya) -> TIDAK diikuti, itu mitigasi keamanan CPU, dibiarkan default aktif
-# - CONFIG_PID_NS (DoraCore=y, file ini "not set") -> DIBIARKAN seperti semula. Ini satu-satunya
-#   bentrok yg sifatnya fungsional (bukan cuma pilihan tuning), cek manual dulu kalau mau diaktifkan
-# - CONFIG_IP_SET_MAX=65534=y di DoraCore -> typo (harusnya cuma "=65534"), diabaikan
-# - CONFIG_SPRD_ROTATION_TASK -> spesifik chipset Unisoc/Spreadtrum, tidak relevan utk Qualcomm SM8450
-# - CONFIG_BBG -> tidak jelas fungsinya & tidak ada dokumentasi yang bisa diverifikasi, di-skip
-# - CONFIG_NTSYNC, CONFIG_ZRAM, CONFIG_ZSMALLOC (DoraCore built-in/=y) -> tetap modular (=m)
-#   sesuai file ini; CONFIG_RCU_LAZY tetap aktif (DoraCore mematikannya) -> preferensi existing dipertahankan
