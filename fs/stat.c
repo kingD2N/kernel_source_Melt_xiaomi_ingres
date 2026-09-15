@@ -33,10 +33,20 @@ extern void ksu_handle_vfs_fstat(int fd, loff_t *kstat_size_ptr);
 extern struct static_key_true ksu_su_compat_enabled;
 extern bool __ksu_is_allow_uid_for_current(uid_t uid);
 extern int ksu_handle_stat(int *dfd, struct filename **filename, int *flags);
+/* Fix: susfs_is_current_proc_no_su() is called below in vfs_statx() but
+ * fs/stat.c only includes susfs_def.h, which doesn't declare it - same
+ * class of missing-declaration bug as the SUS_KSTAT block below (see
+ * kernel_fixes/fs/statfs.c for the sibling case), just not caught until
+ * a susfs4ksu update actually exercises this path under -Werror. */
+extern bool susfs_is_current_proc_no_su(void);
 #endif // #ifdef CONFIG_KSU_SUSFS
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 extern bool susfs_is_inode_sus_kstat(struct inode *inode, bool *out_is_fuse);
 extern void susfs_sus_kstat_spoof_generic_fillattr(struct inode *inode, struct kstat *stat, u32 result_mask);
+/* Fix: susfs_is_current_app_uid() is called below in vfs_getattr_nosec()
+ * but was never declared in this file - implicit declaration under
+ * -Werror since the 10 Sept 2026 SUS_KSTAT rework (see statfs.c). */
+extern bool susfs_is_current_app_uid(void);
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 
 /**
