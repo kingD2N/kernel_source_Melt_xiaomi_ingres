@@ -514,6 +514,12 @@ config NTSYNC
 
 	  If unsure, say N.
 
+config LDO_WL2866D
+	tristate "WL2866 regulators"
+	help
+	  This driver provides support for the voltage regulators and top-level
+	  chip enablement of WL2866
+
 source "drivers/misc/rtimd-i2c/Kconfig"
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"

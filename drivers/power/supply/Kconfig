@@ -812,6 +812,17 @@ config RN5T618_POWER
 	  This driver can also be built as a module. If so, the module will be
 	  called rn5t618_power.
 
+config CHARGER_BQ256XX
+	tristate "TI BQ256XX battery charger driver"
+	depends on I2C
+	depends on GPIOLIB || COMPILE_TEST
+	select REGMAP_I2C
+	help
+	  Say Y to enable support for the TI BQ256XX battery chargers. The
+	  BQ256XX family of devices are highly-integrated, switch-mode battery
+	  charge management and system power path management devices for single
+	  cell Li-ion and Li-polymer batteries.
+
 config BQ_FG_2S
 	tristate "2s battery fuel gauge support"
 	help
@@ -821,6 +832,12 @@ config MI_WIRELESS
 	tristate "mi wirless config"
 	help
 	  Say Y here to enable mi wireless
+
+config WIRELESS_REVERSE_CLOSE
+        tristate "mi wirless reverse close config"
+        depends on MI_WIRELESS
+        help
+          Say Y here to disable mi wireless reverse function
 
 config MI_PEN_WIRELESS
 	tristate "mi pen wirless config"
@@ -847,41 +864,56 @@ config BQ_FG_UPDATE
 	help
 	  Say y here to enable Bq fuel gauge
 
-config CHARGER_BQ256XX
-	tristate "TI BQ256XX battery charger driver"
-	depends on I2C
-	depends on GPIOLIB || COMPILE_TEST
-	select REGMAP_I2C
+config MI_ENABLE_DP
+	tristate "enable or disable displayPort config"
 	help
-	  Say Y to enable support for the TI BQ256XX battery chargers. The
-	  BQ256XX family of devices are highly-integrated, switch-mode battery
-	  charge management and system power path management devices for single
-	  cell Li-ion and Li-polymer batteries.
+	  Say Y here to enable create node to support dp function
+
+config REVERSE_33W
+	tristate "enable or disable reverse 33W config"
+	help
+	  Say Y here to enable create node to support reverse_33W of downshift function
 
 config MI_DTPT
 	tristate "mi dtpt config"
         help
           Say Y here to enable mi dtpt
 
-config MI_CHARGE_PROPERTY
-	tristate "mask charge property config"
-        help
-          Say Y here to mask some properties
-
 config ANTI_BURN_DETECT
 	tristate "anti burn detect config"
 	help
 	  Say Y or M here to enable anti burn detect config
 
-config MARBLE_TOGGLE
-	bool "Adapted to marble"
-	depends on QTI_BATTERY_CHARGER
+config MI_WLS_REVERSE_CHG_ONLY
+	tristate "mi only reverse wls chg config"
+        help
+          Say Y here to enable mi only reverse wls chg
 
-config MARBLE_TOGGLE_2
-	bool "Adapted to marble again"
-	depends on QTI_BATTERY_CHARGER
-	depends on MARBLE_TOGGLE
+config MI_CHARGER_M81
+	tristate "match m81 charger properties"
+	help
+	  Say Y here to enable xiaomi properties similar to
+	  qti_battery_charger_main_m81 module on stock
+
+config MI_FG_MAX_LIFE
+	bool "battery max life statistics properties"
+	help
+	  Say Y here on targets whose charger firmware implements the
+	  max_life_vol, max_life_temp and over_vol_duration properties,
+	  such as marble and zeus.
+
+	  These sit in the middle of enum xm_property_id, whose indices are
+	  the opcodes exchanged with the charger firmware, so enabling them
+	  on a target that lacks them shifts every later property and makes
+	  the fg1_* nodes report the wrong values. If unsure, say N.
+
+config XM_POWER_SUPPLY
+	tristate "Xiaomi power supply config"
+	help
+	  Say Y or M here to enable xiaomi power supply
 
 source "drivers/power/supply/qcom/Kconfig"
+
+source "drivers/power/supply/xiaomi/Kconfig"
 
 endif # POWER_SUPPLY

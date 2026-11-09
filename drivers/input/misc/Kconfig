@@ -957,4 +957,18 @@ endif # INPUT_PWRKEY_SYNC_PANIC
 
 endif # INPUT_PWRKEY_SYNC
 
+config INPUT_XM_GAMEKEY
+	tristate "Xiaomi game key buttons support"
+	default n
+	depends on INPUT && REGULATOR
+	help
+	  This option enables support for game key buttons (aka "triggers").
+
+	  To compile this driver as a module, choose M here. The module will
+	  be called xm_gamekey.
+
+source "drivers/input/misc/aw86927_haptic/Kconfig"
+
+source "drivers/input/misc/aw8622x_haptic/Kconfig"
+
 endif

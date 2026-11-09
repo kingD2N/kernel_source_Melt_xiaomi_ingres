@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0-only
 /*
  *
  * FocalTech TouchScreen driver.
@@ -315,10 +314,18 @@ static int fts_ts_populate_vm_info(struct fts_ts_data *fts_data)
 	return 0;
 }
 
+static void fts_ts_destroy_vm_info(struct fts_ts_data *fts_data)
+{
+	kfree(fts_data->vm_info->iomem_sizes);
+	kfree(fts_data->vm_info->iomem_bases);
+	kfree(fts_data->vm_info);
+}
+
 static void fts_ts_vm_deinit(struct fts_ts_data *fts_data)
 {
 	if (fts_data->vm_info->mem_cookie)
 		gh_mem_notifier_unregister(fts_data->vm_info->mem_cookie);
+	fts_ts_destroy_vm_info(fts_data);
 }
 
 static int fts_ts_trusted_touch_get_vm_state(struct fts_ts_data *fts_data)
